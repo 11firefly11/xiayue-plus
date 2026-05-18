@@ -83,6 +83,14 @@
 
 这种检测方式适合辅助发现因参数为空、参数被特殊值替换、对象 ID 被越权值覆盖而导致的异常回显、权限绕过或数据暴露问题。
 
+## 显示效果
+
+![参数置空重点关注效果](docs/images/param-empty-highlight.png)
+
+当参数置空或越权值检测后的响应包明显大于原始响应包时，插件会在“参数置空”列标记为红色 `重点关注`，并显示命中的数量和最大增量，例如 `重点关注 3/10, 变大8275613`。
+
+如果变异请求的响应体比原始响应体大几千字节以上，通常已经是高风险信号；如果像截图中一样增大几十万、几百万字节，多数情况下需要优先按疑似越权、未授权数据泄露或异常回显处理。该判断仍需结合响应内容人工确认，避免把错误页、重定向页或统一异常页误判为漏洞。
+
 ## 结果说明
 
 主结果表包含原始包、低权限包、未授权包和参数置空结果：
@@ -94,7 +102,45 @@
 
 其中 `✔` 不等于漏洞结论，只表示该变体响应长度与原始响应一致；需要结合响应内容和业务语义进一步确认。
 
+## 编译
 
+编译扩展类：
+
+```powershell
+New-Item -ItemType Directory -Force -Path .\out\release | Out-Null
+javac -encoding UTF-8 -d .\out\release (Get-ChildItem -Path .\sources -Recurse -Filter *.java).FullName
+```
+
+打包 jar：
+
+```powershell
+jar cfm .\xiayue-plus-1.0.jar .\resources\META-INF\MANIFEST.MF -C .\out\release .
+```
+
+## 测试
+
+项目中包含一个用于验证摘要与排序逻辑的 Java harness：
+
+```powershell
+New-Item -ItemType Directory -Force -Path .\out\test | Out-Null
+javac -encoding UTF-8 -d .\out\test (Get-ChildItem -Path .\sources,.\tests -Recurse -Filter *.java).FullName
+java -cp .\out\test burp.BurpExtenderSummaryHarness
+```
+
+预期输出：
+
+```text
+BurpExtenderSummaryHarness OK
+```
+
+## 项目结构
+
+```text
+sources/burp/                  Java 源码和 Burp API 兼容接口
+tests/burp/                    测试 harness
+resources/META-INF/MANIFEST.MF Jar manifest
+xiayue-plus-1.0.jar            当前可加载的扩展 jar
+```
 
 ## 安全声明
 
