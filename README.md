@@ -94,45 +94,7 @@
 
 其中 `✔` 不等于漏洞结论，只表示该变体响应长度与原始响应一致；需要结合响应内容和业务语义进一步确认。
 
-## 编译
 
-编译扩展类：
-
-```powershell
-New-Item -ItemType Directory -Force -Path .\out\release | Out-Null
-javac -encoding UTF-8 -d .\out\release (Get-ChildItem -Path .\sources -Recurse -Filter *.java).FullName
-```
-
-打包 jar：
-
-```powershell
-jar cfm .\xiayue-plus-1.0.jar .\resources\META-INF\MANIFEST.MF -C .\out\release .
-```
-
-## 测试
-
-项目中包含一个用于验证摘要与排序逻辑的 Java harness：
-
-```powershell
-New-Item -ItemType Directory -Force -Path .\out\test | Out-Null
-javac -encoding UTF-8 -d .\out\test (Get-ChildItem -Path .\sources,.\tests -Recurse -Filter *.java).FullName
-java -cp .\out\test burp.BurpExtenderSummaryHarness
-```
-
-预期输出：
-
-```text
-BurpExtenderSummaryHarness OK
-```
-
-## 项目结构
-
-```text
-sources/burp/                  Java 源码和 Burp API 兼容接口
-tests/burp/                    测试 harness
-resources/META-INF/MANIFEST.MF Jar manifest
-xiayue-plus-1.0.jar            当前可加载的扩展 jar
-```
 
 ## 安全声明
 
